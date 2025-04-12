@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp, getApps, FirebaseApp } from "firebase/app";
+import { getFirestore, Firestore } from "firebase/firestore";
+import { useEffect, useState } from "react";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -16,10 +17,23 @@ const firebaseConfig = {
   measurementId: "G-B31TD4LJ35",
 };
 
-// Initialize Firebase
-const app =
-  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getFirestore(app);
+let app: FirebaseApp;
+let db: Firestore;
+
+export function useFirebase() {
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !app) {
+      app =
+        getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+      db = getFirestore(app);
+      setIsInitialized(true);
+    }
+  }, []);
+
+  return { app, db, isInitialized };
+}
 
 export { db };
 export default app;

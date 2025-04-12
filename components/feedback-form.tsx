@@ -20,11 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { db } from "@/lib/firebaseConfig";
+import { useFirebase } from "@/lib/firebaseConfig";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function FeedbackForm() {
+  const { db, isInitialized } = useFirebase();
   const [rating, setRating] = useState<number | null>(null);
   const [feedback, setFeedback] = useState("");
   const [category, setCategory] = useState<string>("");
@@ -36,6 +37,8 @@ export default function FeedbackForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isInitialized) return;
+
     setIsSubmitting(true);
 
     try {
@@ -132,12 +135,10 @@ export default function FeedbackForm() {
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="General">General</SelectItem>
-                  <SelectItem value="Food">Food</SelectItem>
-                  <SelectItem value="Room">Room</SelectItem>
-                  <SelectItem value="Spa">Spa</SelectItem>
-                  <SelectItem value="WaterPark">WaterPark</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="service">Service</SelectItem>
+                  <SelectItem value="product">Product</SelectItem>
+                  <SelectItem value="support">Support</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -175,7 +176,13 @@ export default function FeedbackForm() {
             <Button
               type="submit"
               className="bg-amber-400 hover:bg-amber-500 text-black"
-              disabled={!rating || !feedback || !category || isSubmitting}
+              disabled={
+                !rating ||
+                !feedback ||
+                !category ||
+                isSubmitting ||
+                !isInitialized
+              }
             >
               <Send className="mr-2 h-4 w-4" />
               {isSubmitting ? "Submitting..." : "Submit Feedback"}
